@@ -1,0 +1,1 @@
+# Minuyratech.github.io
