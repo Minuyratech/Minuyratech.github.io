@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minuyra Tech - Modul Genset Transmisi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* CSS Variables for Theming */
+        :root {
+            --bg-primary: #0B132B;
+            --bg-secondary: #1C2541;
+            --bg-tertiary: #3A506B;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A0AEC0;
+            --border-color: #3A506B;
+            --accent-color: #5BC0BE; /* Teal */
+            --accent-color-hover: #6FFFE9;
+            --accent-color-rgb: 91, 192, 190;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.2), 0 0 20px rgba(91, 192, 190, 0.1);
+        }
+
+        html.light {
+            --bg-primary: #F0F7FF;
+            --bg-secondary: #FFFFFF;
+            --bg-tertiary: #E0EFFF;
+            --text-primary: #1C2541;
+            --text-secondary: #4A5568;
+            --border-color: #BEE3F8;
+            --accent-color: #007BFF; /* Bright Blue */
+            --accent-color-hover: #0056b3;
+            --accent-color-rgb: 0, 123, 255;
+            --card-shadow: 0 4px 15px rgba(0, 123, 255, 0.1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-section {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .sidebar {
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            transition: transform 0.3s ease-in-out, background-color 0.3s;
+        }
+        .main-content {
+            background-color: var(--bg-primary);
+            transition: margin-left 0.3s ease-in-out, background-color 0.3s;
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+            border-left: 3px solid transparent;
+            color: var(--text-secondary);
+        }
+        .nav-link:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            transform: translateX(5px);
+        }
+        .nav-link.active {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-left-color: var(--accent-color);
+        }
+        .nav-link.active svg, .nav-link:hover svg {
+            color: var(--accent-color);
+        }
+        .card {
+            background: linear-gradient(145deg, var(--bg-secondary), rgba(var(--accent-color-rgb), 0.05));
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(var(--accent-color-rgb), 0.15);
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, var(--accent-color), var(--accent-color-hover));
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(var(--accent-color-rgb), 0.2);
+        }
+        .btn-primary:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 20px rgba(var(--accent-color-rgb), 0.3);
+        }
+        /* Mobile menu styles */
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); position: fixed; z-index: 40; height: 100%;}
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0 !important; }
+            .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); z-index: 30; display: none; }
+            .overlay.open { display: block; }
+        }
+        /* Theme Toggle Switch */
+        .theme-switch-wrapper { display: flex; align-items: center; justify-content: center; padding: 1rem 0;}
+        .theme-switch { display: inline-block; height: 26px; position: relative; width: 50px; }
+        .theme-switch input { display:none; }
+        .slider { background-color: #ccc; bottom: 0; cursor: pointer; left: 0; position: absolute; right: 0; top: 0; transition: .4s; }
+        .slider:before { background-color: #fff; bottom: 4px; content: ""; height: 18px; left: 4px; position: absolute; transition: .4s; width: 18px; }
+        input:checked + .slider { background-color: var(--accent-color); }
+        input:checked + .slider:before { transform: translateX(24px); }
+        .slider.round { border-radius: 34px; }
+        .slider.round:before { border-radius: 50%; }
+        
+        .news-card {
+            background-color: var(--bg-tertiary);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        .news-card-content {
+            padding: 16px;
+            flex-grow: 1;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="app" class="flex min-h-screen">
+        <!-- Overlay for mobile -->
+        <div id="overlay" class="overlay"></div>
+
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="sidebar w-64 flex-shrink-0 flex flex-col">
+            <div class="p-4 border-b" style="border-color: var(--border-color);">
+                <div class="flex items-center justify-center mb-3">
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhqsBT_5-A0lINaYPcynMLW9_b87OJkevYp69cjQlwZx3sUaXM0uJZ0R78WHiW7rou3innS_Mpjoy-gDo-WlmGwNQibaWbre4YKOURXaZpEzRVa5aeI4lpnMEsgxzuU6CbdM1iCr5VRqgNPih9V-lsxW7_ZnnKihWJdl6-nkoPxY2JBSBBm3RONDZd-/s320/GKL10_TVRI%20-%20Koleksilogo.com.jpg" alt="Logo Minuyra Tech" class="h-12 object-contain">
+                </div>
+                <h1 class="text-2xl font-bold text-center">Minuyra Tech</h1>
+                <p class="text-xs text-center text-gray-400 mt-1">Genset Transmisi v3.0</p>
+            </div>
+            <nav class="flex-1 px-4 py-4 space-y-2">
+                <a href="#" class="nav-link flex items-center p-3 rounded-lg active" data-content="menu"><i data-lucide="home" class="w-5 h-5 mr-3"></i>Menu Utama</a>
+                <a href="#" class="nav-link flex items-center p-3 rounded-lg" data-content="panduan"><i data-lucide="book-open-check" class="w-5 h-5 mr-3"></i>Panduan Operasi</a>
+                <a href="#" class="nav-link flex items-center p-3 rounded-lg" data-content="gangguan"><i data-lucide="shield-alert" class="w-5 h-5 mr-3"></i>Prosedur Gangguan</a>
+                <a href="#" class="nav-link flex items-center p-3 rounded-lg" data-content="perawatan"><i data-lucide="wrench" class="w-5 h-5 mr-3"></i>Perawatan Rutin</a>
+                <a href="#" class="nav-link flex items-center p-3 rounded-lg" data-content="faq"><i data-lucide="help-circle" class="w-5 h-5 mr-3"></i>FAQ</a>
+                <a href="#" class="nav-link flex items-center p-3 rounded-lg" data-content="kontak"><i data-lucide="phone" class="w-5 h-5 mr-3"></i>Kontak Teknis</a>
+            </nav>
+            <div class="p-4 mt-auto">
+                 <div class="flex items-center justify-between p-2 rounded-lg" style="background-color: var(--bg-tertiary);">
+                    <span class="text-sm font-medium flex items-center"><i data-lucide="sun" class="w-4 h-4 mr-2"></i></span>
+                    <label class="theme-switch" for="theme-checkbox">
+                        <input type="checkbox" id="theme-checkbox" />
+                        <div class="slider round"></div>
+                    </label>
+                    <span class="text-sm font-medium flex items-center"><i data-lucide="moon" class="w-4 h-4 mr-2"></i></span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main id="main-content" class="main-content flex-1 p-6 md:p-10">
+            <!-- Mobile Header -->
+            <div class="md:hidden flex justify-between items-center mb-6">
+                <h1 class="text-lg font-bold">Minuyra Tech</h1>
+                <button id="menu-toggle" class="p-2 rounded-md"><i data-lucide="menu" class="w-6 h-6"></i></button>
+            </div>
+
+            <!-- Content will be loaded here -->
+            <div id="content-display">
+                <!-- Menu Utama -->
+                <section id="menu" class="content-section">
+                    <div class="card mb-8">
+                        <h2 class="text-2xl md:text-3xl font-bold mb-2">Selamat Datang di Minuyra Tech</h2>
+                        <p class="text-secondary mb-6">Panduan digital terintegrasi untuk Genset Transmisi. Pilih menu untuk memulai.</p>
+                    </div>
+
+                    <h3 class="text-xl md:text-2xl font-bold mb-4 flex items-center"><i data-lucide="newspaper" class="w-7 h-7 mr-3" style="color: var(--accent-color);"></i>Berita Teknisi Terbaru</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- News Item 1 -->
+                        <a href="#" class="news-card block">
+                            <img src="https://placehold.co/600x400/0B132B/5BC0BE?text=Pelatihan+Teknisi" alt="Berita 1" class="w-full h-40 object-cover">
+                            <div class="news-card-content">
+                                <h4 class="font-bold text-lg mb-2">Pelatihan Genset Model Terbaru</h4>
+                                <p class="text-sm text-secondary">TVRI Riau mengirimkan teknisi untuk mengikuti pelatihan model genset XYZ di Jakarta.</p>
+                            </div>
+                        </a>
+                        <!-- News Item 2 -->
+                        <a href="#" class="news-card block">
+                            <img src="https://placehold.co/600x400/0B132B/5BC0BE?text=Sertifikasi" alt="Berita 2" class="w-full h-40 object-cover">
+                            <div class="news-card-content">
+                                <h4 class="font-bold text-lg mb-2">Sertifikasi Teknisi Ahli 2025</h4>
+                                <p class="text-sm text-secondary">Dua teknisi kami berhasil meraih sertifikasi kelistrikan tingkat nasional tahun ini.</p>
+                            </div>
+                        </a>
+                        <!-- News Item 3 -->
+                        <a href="#" class="news-card block">
+                            <img src="https://placehold.co/600x400/0B132B/5BC0BE?text=Update+SOP" alt="Berita 3" class="w-full h-40 object-cover">
+                            <div class="news-card-content">
+                                <h4 class="font-bold text-lg mb-2">Pembaruan SOP Keamanan</h4>
+                                <p class="text-sm text-secondary">SOP keamanan dan operasional telah diperbarui sesuai standar industri terkini.</p>
+                            </div>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- Panduan Pengoperasian -->
+                <section id="panduan" class="content-section hidden">
+                    <div class="card">
+                        <h2 class="text-2xl md:text-3xl font-bold mb-6 flex items-center"><i data-lucide="book-open-check" class="w-8 h-8 mr-3" style="color: var(--accent-color)"></i>Materi Panduan Pengoperasian</h2>
+                        <p class="text-secondary mb-6">Pilih dan akses materi di bawah ini. Untuk mengunggah file baru, edit tautan pada kode HTML aplikasi ini.</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                             <!-- PDF Document with Cover -->
+                            <div class="card flex flex-col items-center text-center">
+                                <!-- Ganti 'src' dengan nama file gambar sampul Anda -->
+                                <img src="sampul modul contoh.jpg" alt="Sampul Modul PDF" class="rounded-lg mb-4 w-full max-w-xs object-cover shadow-lg">
+                                <h3 class="font-bold text-xl flex items-center mb-3"><i data-lucide="file-text" class="w-6 h-6 mr-2"></i>Modul PDF Utama</h3>
+                                <p class="text-sm text-secondary mb-4 flex-grow">Unduh buku panduan lengkap dalam format PDF untuk referensi offline.</p>
+                                <!-- Ganti 'href' dengan nama file PDF Anda -->
+                                <a href="pdf modul contoh.pdf" class="btn-primary inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md w-full mt-auto">
+                                    <i data-lucide="download" class="w-4 h-4 mr-2"></i> Unduh Modul PDF
+                                </a>
+                            </div>
+
+                            <!-- Image Gallery -->
+                            <div class="card flex flex-col items-center text-center">
+                                <img src="https://placehold.co/400x566/1C2541/FFFFFF?text=Diagram+Kelistrikan" alt="Diagram" class="rounded-lg mb-4 w-full max-w-xs object-cover shadow-lg">
+                               <h3 class="font-bold text-xl flex items-center mb-3"><i data-lucide="image" class="w-6 h-6 mr-2"></i>Galeri Gambar Diagram</h3>
+                               <p class="text-sm text-secondary mb-4 flex-grow">Lihat gambar diagram kelistrikan untuk referensi visual.</p>
+                               <a href="https://placehold.co/1200x800/1C2541/FFFFFF?text=Diagram+Lengkap" target="_blank" class="btn-primary inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md w-full mt-auto">
+                                   <i data-lucide="external-link" class="w-4 h-4 mr-2"></i> Lihat Galeri Gambar
+                               </a>
+                            </div>
+                        </div>
+                         <!-- Video Tutorial -->
+                        <div class="card mt-6">
+                            <h3 class="font-bold text-xl flex items-center mb-3"><i data-lucide="video" class="w-6 h-6 mr-2"></i>Video Tutorial: Prosedur Start-Up</h3>
+                            <p class="text-sm text-secondary mb-4">Tonton video langkah-demi-langkah untuk prosedur start-up yang benar.</p>
+                            <div class="video-container">
+                                <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Perawatan Rutin & Reminder -->
+                <section id="perawatan" class="content-section hidden">
+                    <div class="card">
+                        <h2 class="text-2xl md:text-3xl font-bold mb-6 flex items-center"><i data-lucide="wrench" class="w-8 h-8 mr-3" style="color: var(--accent-color);"></i>Jadwal Perawatan Rutin</h2>
+                        <!-- table -->
+                        <div class="border-t pt-6 mt-8" style="border-color: var(--border-color);">
+                             <h3 class="text-xl md:text-2xl font-bold mb-4 flex items-center"><i data-lucide="bell-ring" class="w-7 h-7 mr-3" style="color: var(--accent-color);"></i>Pengingat Perawatan via WhatsApp</h3>
+                             <p class="text-secondary text-sm mb-4">Atur pengingat satu kali untuk jadwal perawatan berikutnya.</p>
+                             
+                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                 <div>
+                                     <label for="wa-number" class="block text-sm font-medium mb-1">No. WhatsApp PJ</label>
+                                     <input type="tel" id="wa-number" class="w-full p-2 rounded-md border text-sm" placeholder="cth: 6281234567890" style="background-color: var(--bg-primary); border-color: var(--border-color);">
+                                 </div>
+                                 <div>
+                                     <label for="reminder-date" class="block text-sm font-medium mb-1">Tanggal Perawatan</label>
+                                     <input type="date" id="reminder-date" class="w-full p-2 rounded-md border text-sm" style="background-color: var(--bg-primary); border-color: var(--border-color);">
+                                 </div>
+                                  <div>
+                                     <label for="reminder-time" class="block text-sm font-medium mb-1">Waktu Perawatan</label>
+                                     <input type="time" id="reminder-time" class="w-full p-2 rounded-md border text-sm" style="background-color: var(--bg-primary); border-color: var(--border-color);">
+                                 </div>
+                                 <div class="md:col-span-2">
+                                     <button id="set-reminder-btn" class="w-full btn-primary px-4 py-2 text-sm font-medium rounded-md">
+                                        <i data-lucide="save" class="inline w-4 h-4 mr-2"></i>Atur Pengingat
+                                     </button>
+                                 </div>
+                             </div>
+                             
+                             <div id="reminder-status" class="mt-4 p-3 rounded-lg text-sm" style="background-color: var(--bg-primary);"></div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Other sections like Gangguan, FAQ, Kontak remain accessible but are not fully shown here for brevity -->
+                <section id="gangguan" class="content-section hidden"><div class="card">Konten Prosedur Gangguan...</div></section>
+                <section id="faq" class="content-section hidden"><div class="card">Konten FAQ...</div></section>
+                <section id="kontak" class="content-section hidden"><div class="card">Konten Kontak Teknis...</div></section>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Theme Switcher Logic ---
+            const themeToggle = document.getElementById('theme-checkbox');
+            const currentTheme = localStorage.getItem('theme');
+            const applyTheme = (theme) => {
+                if (theme === 'light') {
+                    document.documentElement.classList.add('light');
+                    themeToggle.checked = false;
+                } else {
+                    document.documentElement.classList.remove('light');
+                    themeToggle.checked = true;
+                }
+            };
+            if (currentTheme) {
+                applyTheme(currentTheme);
+            } else { 
+                applyTheme('dark');
+            }
+            themeToggle.addEventListener('change', function() {
+                let theme = this.checked ? 'dark' : 'light';
+                localStorage.setItem('theme', theme);
+                applyTheme(theme);
+            });
+            
+            lucide.createIcons();
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            // --- Navigation Logic ---
+            const showContent = (contentId) => {
+                contentSections.forEach(section => section.classList.add('hidden'));
+                const activeSection = document.getElementById(contentId);
+                if (activeSection) {
+                    activeSection.classList.remove('hidden');
+                     // Re-trigger animation
+                    activeSection.style.animation = 'none';
+                    activeSection.offsetHeight; /* trigger reflow */
+                    activeSection.style.animation = null; 
+                }
+            };
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    const contentId = this.getAttribute('data-content');
+                    showContent(contentId);
+                    if (window.innerWidth <= 768) {
+                        sidebar.classList.remove('open');
+                        overlay.classList.remove('open');
+                    }
+                });
+            });
+
+            // --- Mobile Menu Toggle ---
+            const toggleMenu = () => {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('open');
+            };
+            menuToggle.addEventListener('click', toggleMenu);
+            overlay.addEventListener('click', toggleMenu);
+
+            // --- Reminder Logic ---
+            const waNumberInput = document.getElementById('wa-number');
+            const dateInput = document.getElementById('reminder-date');
+            const timeInput = document.getElementById('reminder-time');
+            const setReminderBtn = document.getElementById('set-reminder-btn');
+            const reminderStatusDiv = document.getElementById('reminder-status');
+            let reminderInterval;
+
+            const displayReminderStatus = () => {
+                const reminder = JSON.parse(localStorage.getItem('gensetReminder'));
+                if (reminder && reminder.number && reminder.datetime) {
+                    const reminderDate = new Date(reminder.datetime);
+                    reminderStatusDiv.innerHTML = `
+                        <p class="font-semibold text-sm">Pengingat Aktif:</p>
+                        <p class="text-xs">Untuk No: <strong>${reminder.number}</strong></p>
+                        <p class="text-xs">Pada: <strong>${reminderDate.toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })}</strong></p>
+                        <button id="delete-reminder-btn" class="mt-2 text-xs text-red-400 hover:underline">Hapus Pengingat</button>
+                    `;
+                    waNumberInput.value = reminder.number;
+                    const yyyy = reminderDate.getFullYear();
+                    const mm = String(reminderDate.getMonth() + 1).padStart(2, '0');
+                    const dd = String(reminderDate.getDate()).padStart(2, '0');
+                    const hh = String(reminderDate.getHours()).padStart(2, '0');
+                    const min = String(reminderDate.getMinutes()).padStart(2, '0');
+                    dateInput.value = `${yyyy}-${mm}-${dd}`;
+                    timeInput.value = `${hh}:${min}`;
+                    document.getElementById('delete-reminder-btn').addEventListener('click', deleteReminder);
+                } else {
+                    reminderStatusDiv.innerHTML = '<p class="text-xs text-secondary">Tidak ada pengingat yang aktif.</p>';
+                }
+            };
+            const setReminder = () => {
+                const number = waNumberInput.value.trim();
+                const date = dateInput.value;
+                const time = timeInput.value;
+                if (!number || !date || !time) {
+                    alert('Harap isi semua kolom: Nomor WhatsApp, Tanggal, dan Waktu.');
+                    return;
+                }
+                const datetimeString = `${date}T${time}`;
+                const reminderDate = new Date(datetimeString);
+                if (reminderDate <= new Date()) {
+                    alert('Waktu pengingat harus di masa depan.');
+                    return;
+                }
+                const reminder = { number: number.replace(/[^0-9]/g, ''), datetime: datetimeString };
+                localStorage.setItem('gensetReminder', JSON.stringify(reminder));
+                alert('Pengingat berhasil diatur!');
+                displayReminderStatus();
+            };
+            const deleteReminder = () => {
+                if (confirm('Apakah Anda yakin ingin menghapus pengingat ini?')) {
+                    localStorage.removeItem('gensetReminder');
+                    waNumberInput.value = '';
+                    dateInput.value = '';
+                    timeInput.value = '';
+                    displayReminderStatus();
+                }
+            };
+            const checkReminder = () => {
+                const reminder = JSON.parse(localStorage.getItem('gensetReminder'));
+                if (!reminder) return;
+                const reminderDate = new Date(reminder.datetime);
+                if (new Date() >= reminderDate) {
+                    const message = encodeURIComponent(`PENGINGAT OTOMATIS: Sudah waktunya melakukan perawatan rutin untuk Genset Transmisi. Mohon segera ditindaklanjuti.`);
+                    const waUrl = `https://wa.me/${reminder.number}?text=${message}`;
+                    window.open(waUrl, '_blank');
+                    localStorage.removeItem('gensetReminder');
+                    displayReminderStatus();
+                }
+            };
+            setReminderBtn.addEventListener('click', setReminder);
+            displayReminderStatus();
+            if(reminderInterval) clearInterval(reminderInterval);
+            reminderInterval = setInterval(checkReminder, 30000);
+
+            // Show initial content
+            showContent('menu');
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
